@@ -1,0 +1,616 @@
+\documentclass[12pt]{article}
+
+\usepackage{a4wide} % уменьшает поля
+\usepackage[utf8]{inputenc}
+\usepackage[russian]{babel} % включает русский язык
+\usepackage{graphicx} % позволяет подключить .eps - файлы
+\usepackage{amsmath}
+\usepackage{amsthm} % теоремы от AMS
+\usepackage{amssymb} % для работы с математическими R и проч.
+\usepackage{floatrow}
+\usepackage{mathrsfs}
+\usepackage[section]{placeins}
+\usepackage{indentfirst} % абзац после заголовка
+\usepackage{misccorr} % точки в заголовках
+
+%\graphicspath{{pics/}}
+
+
+%\newtheoremstyle{rusdef}
+%  {3pt}% measure of space to leave above the theorem. E.g.: 3pt
+%  {3pt}% measure of space to leave below the theorem. E.g.: 3pt
+%  {\itshape}% name of font to use in the body of the theorem
+%  {\parindent}% measure of space to indent
+%  {\bfseries}% name of head font
+%  {.}%
+%  {.5em}%
+%  {}
+   
+  
+\theoremstyle{rusdef}
+\renewcommand\qedsymbol{$\blacksquare$}
+\newtheorem{remark}{Замечание}
+\newtheorem{theorem}{Теорема}
+\newtheorem{definition}{Определение}
+\newtheorem{proposition}{Утверждение}
+
+\newcommand*{\hm}[1]{#1\nobreak\discretionary{}{\hbox{$\mathsurround=0pt #1$}}{}}
+\newcommand{\scalar}[2]{\left<#1,#2\right>}
+\newcommand{\const}{\ensuremath{\operatorname{const}}}
+\newcommand{\sgn}{\ensuremath{\operatorname{sgn}}}
+\renewcommand{\d}[1]{\ensuremath{\operatorname{d}\!{#1}}}
+\newcommand\abs[1]{\left\lvert #1 \right\rvert} % модуль
+\newcommand\brackets[1]{\left( #1 \right)} % скобки
+\newcommand{\R}{\ensuremath{\mathbb{R}}} % R - мн-во вещественных чисел
+\newcommand{\N}{\ensuremath{\mathbb{N}}} % N - мн-во натуральных чисел
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}} % Z - мн-во целых чисел
+\renewcommand{\C}{\ensuremath{\mathbb{C}}} % C - мн-во комплексных чисел
+\newcommand{\E}{\ensuremath{\mathcal{E}}} % E --- эллипсоид
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert} % норма
+\DeclareMathOperator*{\thus}{\Rightarrow} % следствие с возможностью использовать limits
+\DeclareMathOperator*{\tolim}{\to} % стремление с возможностью использовать limits
+\DeclareMathOperator*{\Argmax}{Argmax} % Argmax с возмножностью использовать limits
+\DeclareMathOperator{\rank}{rank} % ранг
+\DeclareMathOperator{\e}{e} % экспонента
+
+% dot above minus
+\makeatletter
+\newcommand{\dotminus}{\mathbin{\text{\@dotminus}}}
+\newcommand{\@dotminus}{%
+	\ooalign{\hidewidth\raise1ex\hbox{.}\hidewidth\cr$\m@th-$\cr}%
+}
+\makeatother
+% end dot above minus
+
+\newcommand{\rpm}{\sbox0{$1$}\sbox2{$\scriptstyle\pm$}
+\raise\dimexpr(\ht1)/2\relax\box2 } % крутой плюс-минус
+
+\begin{document}
+\thispagestyle{empty}
+
+\begin{center}
+\ \vspace{-3cm}
+
+\includegraphics[width=0.5\textwidth]{msu.eps}\\
+
+{\scshape Московский Государственный Университет имени М.~В.~Ломоносова}\\
+Факультет Вычислительной Математики и Кибернетики\\
+Кафедра Системного Анализа
+\vfill
+
+{\LARGE Отчёт по практикуму по курсу <<Внешние оценки множества	разрешимости>>}
+\vspace{.5cm}
+
+\end{center}
+
+\vspace{1cm}
+
+\begin{flushright}
+\large
+\textit{Студент 415 группы}\\
+В.~С.~Терёшин\\
+\vspace{5mm}
+%\textit{Руководитель практики}\\
+%акад., проф., А. Б. Куржанский
+
+\end{flushright}
+
+\vfill
+\begin{center}
+{\large
+Москва, 2014г.}
+\end{center}
+
+\newpage
+\tableofcontents
+\newpage
+\section{Постановка задачи}
+Дана система с управлением и неопределённостью:
+\begin{gather}
+\left\{
+\begin{aligned}
+\dot{x} = A(t)x(t) + B(t)u(t) + C(t)v(t), \; t \in [t_0, t_1] \\
+x(t_1) \in \E(x_1, X_1), \\
+u(t) \in \E(p(t), P(t)), \\
+v(t) \in \E(q(t), Q(t)), \\
+x(t) \in \R^n, u(t) \in \R^m, v(t) \in \R^k.
+\end{aligned}
+\right.
+\end{gather}
+Построить внешние эллипсоидальные оценки множества разрешимости для данной системы и изобразить полученные оценки следующими способами:
+\begin{enumerate}
+\item в проекции на двумерную плоскость;
+\item в проекции на двумерную динамическую плоскость;
+\item проекцию трубки достижимости на трехмерную плоскость;
+\item проекцию трубки достижимости на трехмерную динамическую плоскость.
+\end{enumerate}
+
+\section{Теория}
+\begin{definition}
+Для системы (1)
+\begin{enumerate}
+\item Множество достижимости $\mathbb{X}(t_0 , t_1 , X_0 )$ определяется как множество всех возможных состояний $x_1$ системы в момент времени $t_1$ таких, что для каждого элемента $x_0 \in X_0$ существует некоторое управление $u(t)$ такое, что для любой неопределённости $v(t)$ $x_0$ переводится в это множество.
+\item Множество разрешимости $W(t_0 , t_1 , M)$ в момент времени $t_0$ определяется так:
+$$
+W(t_0 , t_1 , M) = {x_0 : \mathbb{X}(t_0, t_1, x_0) \cap M \neq \varnothing}.
+$$
+\end{enumerate}
+\end{definition}
+
+\begin{definition}
+Трубкой разрешимости $W[t]$ системы (1) называется многозначное отображение
+$$
+W[t] = W(t, t_1, M).
+$$
+\end{definition}
+
+\begin{definition}
+Эллипсоид с центром $q$ и матрицей $Q$ определяется как
+$$
+\E(q, Q) = {x: \scalar{x-q}{Q^{-1}(x-q)} \leqslant 1}.
+$$
+Опорная функция в данном случае равна
+$$
+\rho(l \mid \E(q,Q)) = \scalar{l}{q} + \scalar{l}{Ql}^{1/2}.
+$$
+\end{definition}
+
+\begin{definition}
+Суммой Минковского $k$ компакных множеств $\mathcal{X}_k \subseteq \R^n$ называется
+$$
+\mathcal{X}_1 \oplus \ldots \oplus \mathcal{X}_k = \bigcup\limits_{x_1 \in \mathcal{X}_1} \ldots \bigcup\limits_{x_k \in \mathcal{X}_k} \left\{ x_1 + \ldots + x_k \right\}.
+$$
+\end{definition}
+
+\begin{definition}
+Для компактных множеств $\mathcal{X}_1, \mathcal{X}_2 \subseteq \R^n$ разностью Минковского называется
+$$
+\mathcal{X}_1 \dotminus \mathcal{X}_2 = \left\{ x \in \R^n \mid x + \mathcal{X}_2 \subseteq \mathcal{X}_1 \right\}.
+$$
+\end{definition}
+
+\begin{proposition}
+Пусть $\E(q, Q) \subseteq \R^n$, $A \in \R^{m \times n}$ и $b \in \R^m$. Тогда
+$$
+A\E(q, Q) + b = \E(Aq + b, AQA^T).
+$$
+\end{proposition}
+
+\begin{proposition}
+Пусть $l \in \R^n$, $l \neq 0$. Тогда внешней аппроксимацией $\E(q, Q_l^+)$ суммы по Минковскому $\E(q_1, Q_1) \oplus \ldots \oplus \E(q_k, Q_k)$ называется эллипсоид такой, что
+$$
+\E(q_1, Q_1) \oplus \ldots \oplus \E(q_k, Q_k) \subseteq \E(q, Q_l^+)
+$$
+и
+$$
+\rho(\pm l \mid \E(q_1, Q_1) \oplus \ldots \oplus \E(q_k, Q_k)) = \rho(\pm l \mid \E(q, Q_l^+)).
+$$
+В этом случае
+\begin{gather}
+q = q_1 + \ldots + q_k, \notag \\
+Q_l^+ = \left( \scalar{l}{Q_1 l}^{1/2} + \ldots + \scalar{l}{Q_k l}^{1/2} \right) \left( \frac{1}{\scalar{l}{Q_1 l}^{1/2}}Q_1 + \ldots + \frac{1}{\scalar{l}{Q_k l}^{1/2}}Q_k \right) \notag
+\end{gather}
+\end{proposition}
+
+\begin{proposition}
+Вняшняя аппроксимация $\E(q, Q_l^+)$ для разности Минковского $\E(q_1, Q_1) \dotminus \E(q_2, Q_2)$ имеет следующие центр и матрицу конфигурации:
+\begin{gather}
+q = q_1 - q_2, \notag \\
+Q_l^+ = \left( Q_1^{1/2} - SQ_2^{1/2} \right)^T \left( Q_l^{1/2} - SQ_2^{1/2} \right), \notag
+\end{gather}
+где $S$ --- ортогональная матрица такая, что $Q_1^{1/2}l \parallel SQ_2^{1/2}l$.
+\end{proposition}
+\begin{remark}
+Не для каждого направления $l$ существует внешняя аппроксимация для разности Минковского касается этой разности.
+\end{remark}
+
+\begin{proposition}
+Внешняя аппроксимация $\E(q, Q_l^+)$ для выражения $\E(q_0, Q_0) + \int\limits_{t_0}^t \E(q(t), Q(t))$ иммеет следующие центр и матрицу конфигурации:
+\begin{gather}
+\dot{q^+} = q(t), \; q^+(t_0) = q_0, \notag \\
+\dot{Q^+} = \pi(t) Q^+(t) + \pi^{-1}(t) Q(t), \; Q^+(t_0) = Q_0, \notag
+\end{gather}
+где
+$$
+\pi(t) = \frac{\scalar{l}{Q(t)l}^{1/2}}{\scalar{l}{Q_0 l}^{1/2} + \int\limits_{t_0}^t \scalar{l}{Q(\tau)l}^{1/2} d\tau}.
+$$
+\end{proposition}
+
+\begin{definition}
+Матрица Коши $X(t, \tau)$ для системы (1) определяется как решение системы
+$$
+\left\{
+\begin{aligned}
+\frac{\partial}{\partial t} X(t, \tau) = -A(t)X(t, \tau), \\
+X(\tau, \tau) = E.
+\end{aligned}
+\right.
+$$
+\end{definition}
+
+Решение системы (1) с краевым условием $x(t_1) = x_1$ и управлением $u(t)$ записывается в виде
+$$
+x(t) = X(t, t_1)x_1 + \int\limits_{t_1}^{t} X(t, \tau)B(\tau)u(\tau)d\tau + \int\limits_{t_1}^{t} X(t, \tau)C(\tau)v(\tau)d\tau.
+$$
+
+\subsection{Внешняя эллипсоидальная аппроксимация}
+Основное утверждение, на котором основывается построение внешней эллипсоидальной аппроксимации:
+\begin{proposition}
+Пусть даны эллипсоиды $\E_k = \E(0, Q_k )$, $k = 1 \ldots n$. Тогда для любых $r_k > 0$, $k = 1\ldots n$ для $Q_+ = \sum\limits_{k=1}^n r_k \sum\limits_{k=1}^n \frac{Q_k}{r_k}$ выполнено включение
+$$
+\E_+ = \E(0, Q_+) \subseteq \sum\limits_{k=1}^n \E_k.
+$$
+\end{proposition}
+
+Множество достижимости можно приблизить выражением
+%\begin{gather}
+%W[t] = \left( X(t, t_1) \E(x_1, X_1) \dotminus \int\limits_{t}^{T_1} X(t, \tau) C(\tau) \E(q(\tau), Q(\tau)) d\tau \right) \oplus \notag \\
+%\oplus \int\limits_{t}^{T_1} X(t, \tau) B(\tau) \E(p(\tau), P(\tau)) d\tau. \notag
+%\end{gather}
+\begin{gather}
+W_k[t] = \left( X(t, \tau_k) W_{k-1}[\tau_k] \dotminus \int\limits_{t}^{\tau_k} X(t, \tau) C(\tau) \E(q(\tau), Q(\tau)) d\tau \right) \oplus \notag \\
+\oplus \int\limits_{\tau_k}^{t} X(t, \tau) B(\tau) \E(p(\tau), P(\tau)) d\tau, \notag
+\end{gather}
+$W[t] \sim W_k[t]$ при достаточно больших $k$.
+
+Из определения многозначного интеграла, множество $W[t]$ можно рассматривать как предел интегральных сумм, т.е. как предел сумм эллипсоидов. Строя внешнюю эллипсоидальную аппроксимацию для каждой интегральных суммы, в пределе для $W[t]$ получим аппроксимирующий эллипсоид $\E_+[t] = \E(x_+(t), X_+(t))$, для которого параметры находятся из следующих систем, следующих из свойств, описанных в предыдущем параграфе:
+$$
+\dot{x_+}(t) = A(t)x_+(t) + B(t)p(t) + C(t)q(t), \; x_+(t_1) = x_1.
+$$
+
+Фиксируем какое-либо направление $l_0 \in \R^n$ и считаем $l(t)$ таким, что
+$$
+\dot{l}(t) = -A^T(t)l(t), \; l(t_0) = l_0.
+$$
+Тогда
+\begin{gather}
+\dot{X_l^+}(t) = A(t)X_l^+(t) + X_l^t(t)A^T(t) - \notag \\
+- \pi_l(t) X_l^+(t) - \frac{1}{\pi_l(t)} B(t)P(t)B^T(t) + \notag \\
++ (X_l^+(t))^{1/2} S_l(t) (C(t) Q(t) C^T(t))^{1/2} + \notag \\
+(C(t) Q(t) C^T(t))^{1/2} S_l^T(t) (X_l^+(t))^{1/2}, \notag \\
+X_l^+(t_1) = X_1, \notag
+\end{gather}
+где
+$$
+\pi_l(t) = \frac{\scalar{l(t)}{B(t)P(t)B^T(t)l(t)}^{1/2}}{\scalar{l(t)}{X_l^+(t)l(t)}^{1/2}},
+$$
+а ортогональная матрица $S_l(t)$ удовлетворяет уравнению
+$$
+S_l(t) (C(t)Q(t)C^T(t))^{1/2} l(t) = \frac{\scalar{l(t)}{C(t)Q(t)C^T(t)l(t)}^{1/2}}{\scalar{l(t)}{X_l^+(t)l(t)}^{1/2}} (X_l^+(t))^{1/2} l(t).
+$$
+
+При этом касание аппроксимирующего эллипсоида $\E(x_+(t), X_+(t))$ множества $W[t]$ происходит в точке
+$$
+x^*(t) = x_+(t) + \frac{X_+(t)l(t)}{\scalar{l(t)}{X_+l(t)}^{1/2}}.
+$$
+
+\begin{proof}
+%Рассмотрим эволюционное уравнение данной системы:
+%$$
+%\lim\limits_{\sigma \to 0} \sigma^{-1} h_+\left( \left((I + \sigma A(t)) \mathcal{X}_+(t) \dotminus \sigma C(t)\mathcal{Q}(t)\right) \oplus \sigma B(t)\mathcal{P}(t), \; \mathcal{X}_+(t + \sigma) \right) = 0,
+%$$
+%что означает, что при малом $\sigma$ для всех $t$ выполнено включение:
+%$$
+%\left((I + \sigma A(t)) X_+(t) \dotminus \sigma C(t)\mathcal{Q}(t)\right) \oplus \sigma B(t)\mathcal{P}(t) \subseteq \mathcal{X}_+(t + \sigma).
+%$$
+%Построим внешнюю эллипсоидальную оценку разности по Минковскому в левой части:
+%\begin{gather}
+%Q^* = \left( \left( (I + \sigma A(t)) X_+(t) (I + \sigma A(t))^T \right)^{1/2} - S(t) \sigma^{1/2} \left( C(t)Q(t)C^T(t) \right)^{1/2} \right)^T \cdot \notag \\
+%\cdot \left( \left( (I + \sigma A(t)) X_+(t) (I + \sigma A(t))^T \right)^{1/2} - S(t) \sigma^{1/2} \left( C(t)Q(t)C^T(t) \right)^{1/2} \right), \notag \\
+%X_+(t + \sigma) = Q^* + \sigma B(t)P(t)B^T(t) + \pi_l(t)\sigma Q^* + \pi_l^{-1}(t)\sigma^2 B(t)P(t)B^T(t), \notag
+%\end{gather}
+%где
+%$$
+%\pi_l(t) = \frac{\scalar{l}{B(t)P(t)B^T(t)}^{1/2}}{\scalar{l}{Q^*l}^{1/2}}.
+%$$
+Динамика внешней эллипсоидальной аппроксимации заданной системы описывается следующим эволюционным уравнением:
+$$
+\lim\limits_{\sigma \to 0} h_{-} (W[t-\sigma],((I-\sigma A(t))W(t) \oplus \sigma (-B(t) \mathcal{P}(t))) \dotminus \sigma(-C(t)\mathcal{Q}(t))) = 0, W[t_1] = \E(y_1,Y_1).
+$$
+
+Это уравнение рассматривается при эллипсоидальных ограничениях $\mathcal{P}$ и $\mathcal{Q}$ (без ограничения общности будем считать, что их центры расположены в нуле). Фактически оно означает, что при достаточно малых значения $\sigma$ на всем интервале времени $[t_0,t_1]$ выполнено включение
+$$
+W[t-\sigma] \supseteq ((I-\sigma A(t))W(t) \oplus \sigma (-B(t) \E(0,P(t))) \dotminus \sigma(-C(t)\E(0,Q(t))).
+$$
+
+Запишем внешнюю эллипсоидальную аппроксимацию для разности, стоящей в правой части уравнения:
+\begin{multline*}
+X(t-\sigma) = (1+p^{-1}(t))(I-\sigma A(t))X(t)(I-\sigma A^T(t)) +\\+
+(1+p(t)) B(t)P(t)B^T(t) + \sigma^2 C(t)Q(t)C(t) -\\-
+[(1+p^{-1}(t))(I-\sigma A(t))X(t)(I-\sigma A^T(t)) +\\+
+(1+p(t)) B(t)P(t)B^T(t)]^{1/2}S(t)(C(t)Q(t)C(t))^{1/2} -\\-
+(C(t)Q(t)C(t))^{1/2}S^T(t)[(1+p^{-1}(t))(I-\sigma A(t))X(t)(I-\sigma A^T(t)) +\\+
+(1+p(t)) B(t)P(t)B^T(t)]^{1/2} =\\=
+ \left\{ p(t) = -\pi(t)*\sigma \right\} = \\ =
+ X(t) - \sigma\{A(t)X(t) + X(t)A^T(t) - \pi(t)X(t) - \pi^{-1}(t)B(t)P(t)B^T(t) +\\+ (X(t))^{1/2}S(t)(C(t)Q(t)C^T(t))^{1/2} + (C(t)Q(t)C^T(t))^{1/2}S^T(t)(X(t))^{1/2}\} + o(\sigma).
+\end{multline*}
+
+Перенеся $Q(t)$ в левую часть, разделив на $\sigma$ и перейдя к пределу, получим указанную выше оценку, касающуюся оригинального множества в направлении $l(t)$ хорошей кривой.
+
+\end{proof}
+
+Внешняя аппроксимация исходного множества разрешимости $W[t]$ естественно определяется как пересечение по всем выбранным векторам $l_0$ эллипсоидов $\E(x_+(t), X_+(t))$, касающихся $W[t]$ в каждый момент времени в плоскости, перпендикулярной к $l(t) \hm= X(t_1,t)l_0$.
+
+Метод нахождения $S_l(t)$ можно найти в \cite{Daryin}.
+
+\section{Описание работы}
+При проекции трубки разрешимости на плоскость встаёт вопрос, о том какие именно аппроксимирующие эллипсоиды выбрать, чтобы в момент времени $t_0$ касание между эллипсоидами и точным множеством происходило именно в заданной плоскости (другими словами в момент времени $t_0$ хорошие кривые должны пересекать искомую плоскость). Для того чтобы ответить на этот вопрос мы решаем задачу в прямом времени (в момент $t_0$ эллипсоиды касаются исходного множества по направлениям равномерно распределенным в плоскости) и смотрим куда перейдут начальные направления. Взяв эти новые направления за основу мы решаем задачу в обратном времени, причем к моменту времени $t_0$ новые направления перейдут в исходные и таким образом касание между аппроксимирующим множеством и исходным будет происходить в исходной плоскости.
+\section{Результаты работы программы}
+\subsection{Пример 1}
+Входные данные:
+\begin{gather}
+A = 0.1 \cdot \left[
+\begin{array}{cccc}
+1 & 0 & 1 & 0 \\
+0 & 1 & 0 & 3 \\
+0 & 0 & 2 & 0 \\
+0 & 0 & 0 & 1
+\end{array}
+\right],
+B = C = \left[
+\begin{array}{cc}
+1 & 0 \\
+0 & 1 \\
+0 & 0 \\
+0 & 0
+\end{array}
+\right], \notag \\
+x_1 = \left[
+\begin{array}{c}
+0 \\
+0 \\
+0 \\
+0
+\end{array}
+\right],
+X_1 = \left[
+\begin{array}{cccc}
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 1
+\end{array}
+\right], \notag \\
+p = \left[
+\begin{array}{c}
+0 \\
+0
+\end{array}
+\right],
+P = \left[
+\begin{array}{cc}
+1 & 0 \\
+0 & 1
+\end{array}
+\right], \notag \\
+q = \left[
+\begin{array}{c}
+0 \\
+0
+\end{array}
+\right],
+Q = \left[
+\begin{array}{cc}
+1 & 0 \\
+0 & 1
+\end{array}
+\right], \notag \\
+T_0 = 0, \; T_1 = 6, \; dT = 0.5, \notag \\
+l_1 = \left[
+\begin{array}{c}
+1 \\
+0 \\
+0 \\
+0
+\end{array}
+\right],
+l_2 = \left[
+\begin{array}{c}
+0 \\
+0 \\
+1 \\
+0
+\end{array}
+\right], \notag
+\end{gather}
+
+\begin{figure}[p]
+	\centering
+	\includegraphics[scale=1.0]{pics/plot1.eps}
+	\caption{Пример 1: проекция трубки достижимости на $l_1, l_2$}
+	\label{pic1_1}
+\end{figure}
+
+\begin{figure}[p]
+	\centering
+	\includegraphics[scale=1.0]{pics/plot2.eps}
+	\caption{Пример 1: аппроксимирующие эллипсоиды в момент времени $t = 0$}
+	\label{pic1_2}
+\end{figure}
+
+\newpage
+
+\subsection{Пример 2}
+\begin{gather}
+A = 0.1 \sin t \left[
+\begin{array}{cccc}
+	1 & 0 & 0 & 0 \\
+	0 & 1 & 0 & 0 \\
+	0 & 0 & 1 & 0 \\
+	0 & 0 & 0 & 1
+\end{array}
+\right],
+B = \left[
+\begin{array}{cccc}
+	1 & 0 & 0 & 0 \\
+	0 & 0 & 0 & 0 \\
+	0 & 0 & 1 & 0 \\
+	0 & 0 & 0 & 0
+\end{array}
+\right],
+C = 0.1 \cdot \left[
+\begin{array}{c}
+	1 \\
+	2 \\
+	1 \\
+	1
+\end{array}
+\right], \notag \\
+x_1 = \left[
+\begin{array}{c}
+	0 \\
+	0 \\
+	0 \\
+	0
+\end{array}
+\right],
+X_1 = \left[
+\begin{array}{cccc}
+	1 & 0 & 0 & 0 \\
+	0 & 1 & 0 & 0 \\
+	0 & 0 & 1 & 0 \\
+	0 & 0 & 0 & 1
+\end{array}
+\right], \notag \\
+p = \left[
+\begin{array}{c}
+	0 \\
+	0 \\
+	0 \\
+	0
+\end{array}
+\right],
+P = \left[
+\begin{array}{cccc}
+	20 & 0 & 0 & 0 \\
+	0 & 1 & 0 & 0 \\
+	0 & 0 & 1 & 0 \\
+	0 & 0 & 0 & 0
+\end{array}
+\right], \notag \\
+q = 0,
+Q = 0.1, \notag \\
+T_0 = 0, \; T_1 = 10, \; dT = 0.5, \notag \\
+l_1(t) = \left[
+\begin{array}{c}
+	1 \\
+	0 \\
+	0 \\
+	0
+\end{array}
+\right],
+l_2(t) = \left[
+\begin{array}{c}
+	0 \\
+	0 \\
+	\sin t \\
+	\cos t
+\end{array}
+\right], \notag
+\end{gather}
+
+\begin{figure}[p]
+	\centering
+	\includegraphics[scale=1.0]{pics/plot3.eps}
+	\caption{Проекция трубки достижимости на $l_1(t), l_2(t)$}
+	\label{pic2_1}
+\end{figure}
+
+\begin{figure}[p]
+	\centering
+	\includegraphics[scale=1.0]{pics/plot4.eps}
+	\caption{Аппроксимирующие эллипсоиды в момент времени $t = 0$}
+	\label{pic2_2}
+\end{figure}
+
+\newpage
+
+\subsection{Пример 3}
+Данный пример иллюстирует задачу из задания 1.
+\begin{gather}
+L = 5, L_1 = 1, L_2 = 3, C_1 = 1, C_2 = 4, U_1^0 = U_2^0 = 0.1, I_1^0 = I_2^0 = 0.2, \tilde{U} = 1, \notag \\
+D = L_1 L_2 + L (L_1 + L_2), \notag \\
+A = \left[
+\begin{array}{cccc}
+	0 & 0 & -\frac{L+L_2}{D} & -\frac{L}{D} \\
+	0 & 0 & -\frac{L}{D} & -\frac{L+L_1}{D} \\
+	\frac{1}{C_1} & 0 & 0 & 0 \\
+	0 & \frac{1}{C_2} & 0 & 0
+\end{array}
+\right],
+B = \left[
+\begin{array}{cccc}
+	\frac{L}{D} \\
+	\frac{L+L_1}{D} \\
+	0 \\
+	0
+\end{array}
+\right],
+C = \left[
+\begin{array}{c}
+	0 \\
+	0 \\
+	0 \\
+	0
+\end{array}
+\right], \notag \\
+x_1 = \left[
+\begin{array}{c}
+	I_1^0 \\
+	I_2^0 \\
+	U_1^0 \\
+	U_2^0
+\end{array}
+\right],
+X_1 = 0.01 \cdot \left[
+\begin{array}{cccc}
+	1 & 0 & 0 & 0 \\
+	0 & 1 & 0 & 0 \\
+	0 & 0 & 1 & 0 \\
+	0 & 0 & 0 & 1
+\end{array}
+\right], \notag \\
+p = 0,
+P = \tilde{U}, \notag \\
+q = 0,
+Q = 1, \notag \\
+T_0 = 0, \; T_1 = 30, \; dT = 0.5, \notag \\
+l_1 = \left[
+\begin{array}{c}
+	0 \\
+	0 \\
+	0 \\
+	1
+\end{array}
+\right],
+l_2 = \left[
+\begin{array}{c}
+	0 \\
+	0 \\
+	1 \\
+	0
+\end{array}
+\right], \notag
+\end{gather}
+
+\begin{figure}[p]
+	\centering
+	\includegraphics[scale=1.0]{pics/plot5.eps}
+	\caption{Проекция трубки достижимости на $l_1, l_2$}
+	\label{pic3_1}
+\end{figure}
+
+\begin{figure}[p]
+	\centering
+	\includegraphics[scale=1.0]{pics/plot6.eps}
+	\caption{Аппроксимирующие эллипсоиды в момент времени $t = 0$}
+	\label{pic3_2}
+\end{figure}
+
+\newpage
+\begin{thebibliography}{99}
+	\bibitem{EllToolMan} П.~Гагаринов, А.~А.~Куржанский: Инструкция к Ellipsoidal Toolbox, 2014.
+	\bibitem{Daryin} А.~Н.~Дарьин, А.Б.Куржанский: Метод вычисления инвариантных множеств линейных систем большой размерности при неопределённых возмущениях. Доклады РАН. 2012. Т. 446. \textnumero 6. С. 607–611.
+\end{thebibliography}
+
+\end{document}

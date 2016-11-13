@@ -1,0 +1,458 @@
+\documentclass[12pt]{article}
+
+\usepackage{a4wide}
+\usepackage[utf8]{inputenc}
+\usepackage[russian]{babel}
+\usepackage{graphicx}
+\usepackage{indentfirst}
+\usepackage{url}
+
+\usepackage{float}
+\usepackage{verbatim}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+%\usepackage{wasysym}
+%\usepackage{enumitem}
+%\usepackage{animate}
+
+\newtheorem{define}{Определение}
+\newtheorem{myfact}{Свойство}
+\newtheorem{myth}{Теорема}
+\newtheorem{assumption}{Предположение}
+
+%\setlist{nolistsep, itemsep=0cm, parsep=0pt}
+
+\newcommand{\ol}[1]{\overline{#1\vphantom{()}}}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand*{\hm}[1]{#1\nobreak\discretionary{}{\hbox{$\mathsurround=0pt #1$}}{}}
+\newcommand{\scalar}[2]{\left<#1,#2\right>}
+\newcommand{\const}{\ensuremath{\operatorname{const}}}
+\newcommand{\sgn}{\ensuremath{\operatorname{sgn}}}
+\renewcommand{\d}[1]{\ensuremath{\operatorname{d}\!{#1}}}
+\newcommand\abs[1]{\left\lvert #1 \right\rvert} % модуль
+\newcommand\brackets[1]{\left( #1 \right)} % скобки
+\newcommand{\R}{\ensuremath{\mathbb{R}}} % R - мн-во вещественных чисел
+\newcommand{\N}{\ensuremath{\mathbb{N}}} % N - мн-во натуральных чисел
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}} % Z - мн-во целых чисел
+\renewcommand{\C}{\ensuremath{\mathbb{C}}} % C - мн-во комплексных чисел
+\newcommand{\E}{\ensuremath{\mathcal{E}}} % E --- эллипсоид
+%\newcommand{\norm}[1]{\left\lVert #1 \right\rVert} % норма
+\DeclareMathOperator*{\thus}{\Rightarrow} % следствие с возможностью использовать limits
+\DeclareMathOperator*{\tolim}{\to} % стремление с возможностью использовать limits
+\DeclareMathOperator*{\Argmax}{Argmax} % Argmax с возмножностью использовать limits
+\DeclareMathOperator{\rank}{rank} % ранг
+\DeclareMathOperator{\e}{e} % экспонента
+
+
+\begin{document}
+\thispagestyle{empty}
+
+\begin{center}
+\ \vspace{-3cm}
+
+\includegraphics[width=0.5\linewidth]{msu}\\
+
+{\scshape Московский государственный университет имени М.~В.~Ломоносова}\\
+Факультет вычислительной математики и кибернетики\\
+Кафедра системного анализа
+\vfill
+
+{\LARGE Отчетная работа по практикуму}
+
+\vspace{1cm}
+{\Huge\bfseries <<Построение информационного множества динамической системы>>}
+
+~\\
+~\\
+~\\
+
+\begin{flushright}
+  \large
+  \textit{Студент 515 группы}\\
+  В.С.Терёшин
+
+ \vspace{5mm}
+  ~\\
+  ~\\
+
+  \textit{Руководитель практикума}\\
+   И.\,В.~Востриков
+
+\end{flushright}
+
+\end{center}
+
+\vfill
+
+\begin{center}
+Москва, 2015
+\end{center}
+
+\newpage
+
+\tableofcontents
+
+\newpage
+
+\section{Постановка задачи}
+Построить внешнюю оценку информационного множества для системы:
+$$\dot{x}(t) = A(t)x(t) + C(t)v(t)$$
+при уравнение наблюдения измерительного устройства:
+$$y(t) = G(t)x(t) + \xi$$
+на отрезке $t \in [t_0;t_1]$.
+
+Пусть $v \in \E(q(t),Q(t))$, а $\xi \in \E(0, R(t))$, где $Q = Q' > 0$, $R = R' > 0$. А $x(t_0) \in \mathcal{X}^0 = \E(x^0, X^0)$. Необходимо построить соответствующую трубку информационного множества.
+
+\section{Теория}
+Для начала введем понятие эллипсоида над пространством $\R^n$. Пусть $q \in \R^n$ --- координата центра эллипсоида и $Q \in \R^{n \times n}, Q = Q' > 0$ --- матрица конфигурации соответственно.
+\begin{define}
+Эллипсоидом $\E(q,Q)$ называется множество
+$$
+\E(q,Q) = \left\{ x \in \R^n \mid \; <x-q,Q^{-1}(x-q)> \leqslant 1 \right\}.
+$$
+\end{define}
+
+Так же введем второе определение, основанное на понятие опорной функции эллипсоида, смягчая требования на матрицу конфигурации до вида $Q = Q' \geqslant 0$.
+\begin{define}
+Эллипсоидом $\E(q,Q)$ называется множество
+$$
+\E(q,Q) = \left\{ x \in \R^n \mid \; <l,x> \leqslant <l,q> + <l,Ql>^{1/2}, l \in \R^n \right\}.
+$$
+\end{define}
+
+\begin{define}
+Множеством достижимости системы в момент времени $t$ называется множество
+$$
+\mathcal{X}[t] = \left\{ x(t; t_0, x_0) \mid \;  \exists x_0 \in \mathcal{X}^0  \right\},
+$$
+где $x(t)$ --- решение данной системы.
+\end{define}
+\begin{define}
+Трубкой достижимости системы называется многозначное отображение
+$$
+\mathbb{X}[t] = \left\{ (\tau,x) \in \R \times \R^n \mid \;  x \in \mathcal{X}[\tau], \tau \in [t_0,t] \right\}.
+$$
+\end{define}
+В силу уравнения измерительного устройства
+$$y[t] = G(t)x(t) + \xi(t)$$
+получим, что
+$$G(t)x(t) \in y[t] + \E(0,R(t)).$$
+Введем обозначения
+\begin{gather}
+k^2(t,x) = <y[t] - G(t)x,R^{-1}(y[t] - G(t)x)>, \notag \\
+\chi(t) = 1 \text{, если } k^2(t,x) - 1 > 0, \notag \\
+\chi(t) = 0 \text{, если } k^2(t,x) - 1 \leqslant 0. \notag
+\end{gather}
+\begin{define}
+Определим информационное множество $\mathcal{X}$ следующим образом
+$$\mathcal{X} = {x: V(t,x) \leqslant 0}$$
+где $V(t,x)$ --- функция цены, заданная следующим образом
+$$V(t,x) = \min\limits_v\left\{\phi_0(x) + \int_{t_0}^{t}(k^2(s,x(s)) - 1)_{+}ds|x(t) = x)\right\}, \; t \leqslant t_0$$
+$$\phi_0(x) = (<x - x^0,(X^0)^{-1}(x - x^0))>)_{+}$$
+\end{define}
+Уравнение ГЯБ:
+$$V_t + \textbf{H}(t,x,V_x) = 0, V(t_0,x) = d^2(x,\mathcal{X}^0),$$
+где
+$$\textbf{H}(t,x,V_x) = max{<p, f(t,x,v)>|v \in \E(q,Q)} - d^2(y(t) - g(t),\E(0,R))$$
+Будем искать внешние аппроксимации множества $\mathcal{X}$ из следующего:
+\begin{assumption}
+Заданными функциями $\textit{H}(t,x,V_x)$, $w^+(t,x) \in C^1$ и $\mu(t)\in L_1$
+можно оценить $\textbf{H}(t,x,V_x)$ следующим неравенством
+$$\textbf{H}(t,x,V_x) \leqslant \textit{H}(t,x,V_x), {t,x,p}$$
+$$w^{+}(t,x) + \textit{H}(t,x,w^+_x)\leqslant \mu(t)$$
+Тогда соответствующая оценка нашего информационного множества, будет содержать само множество:
+$$\mathcal{X} \subseteq \mathcal{X}^+$$
+\end{assumption}
+ Для линейной системы гамильтониан имеет следующий вид:
+ $$\textbf{H}(t,x,V_x) = max{<p, A(t)x + C(t)v>|v \in \E(q,Q)} - \chi(t)(k^2(t,x) - 1)$$
+ И, используя соотношение
+$$<p,C(t)\textit{Q}(t)C'(t)p>^{1/2} \leqslant \gamma^2(t) + (4\gamma^2(t))^{-1}<p,C(t)\textit{Q}(t)C'(t)p>, \forall p \in \R^n$$
+получаем
+$$\textit{H}(t,x,p) = <p, A(t)x + C(t)q> + \gamma^2(t) + (4\gamma^2(t))^{-1}<p,C(t)Q(t)C'(t)p>  - \chi(t)(k^2(t,x) - 1)$$
+$$\textbf{H}(t,x,V_x) \leqslant \textit{H}(t,x,V_x).$$
+Будем искать оценку вида:
+$$w(t,x) = <x - x*(t), P(t)(x - x^*(t))> + h^2(t) - 1,$$
+где $h^2(t,x)$ --- дифференцируема, $P(t) = P'(t) > 0$ и предположение $k^2(t,x) \leqslant 1$, так что $\chi(t) = 1$.
+В силу неравенств и оценок получим теорему:
+\begin{myth}
+Внешней оценкой информационного множества $\mathcal{X}$ будет эллипсоид:
+$$\E(x^*(t),P^{-1}(t)\beta(t))$$
+где $P(t), x^*(t), \beta(t)$ определяются из следующих дифференциальных уравнений.
+$$\dot{P} + P'A(t) + A'(t)P + (\gamma^2(t))^{-1}PC(t)Q(t)C'(t)P - \chi(t)G'(t)R(t)G(t) = 0$$
+$$\dot{x}^* = A(t)x^*(t) + C(t)q(t) + \chi(t)P^{-1}(t)G'(t)R(t)(y(t) - G(t)x^*(t))$$
+$$\dot{h}^2 = <y(t) - G(t)x^*(t), R(t)(y(t) - G(t)x^*(t))>$$
+при начальных условиях
+$$P(t_0) = (X^0)^{-1}, x^*(t_0) = x^0, h^2(t,x) = 0,$$
+а  $\beta(t)$ получается из следующего равенства:
+$$\beta(t) = 1 - h^2(t,x) + \int_{t_0}^t(\gamma^2(s) + 1)ds$$
+\end{myth}
+\begin{myth}
+$\mathcal{X}[t] = \cap \left\{\E_{\gamma}[t]|\gamma^2(\cdot)\right\}$
+\end{myth}
+\section{Примеры}
+\subsection{Пример 1}
+\begin{gather}
+A = \left[ \begin{array}{cc}
+0 & 0\\
+0 & -1
+\end{array} \right],
+C = \left[ \begin{array}{cc}
+1 \\
+0.5
+\end{array} \right], \notag \\
+G_1 = \left[ \begin{array}{cc}
+1 & 1\\
+0 & -1
+\end{array} \right],
+G_2 = \left[ \begin{array}{cc}
+0 & 0\\
+-1 & 1
+\end{array} \right],
+G_3 = \left[ \begin{array}{cc}
+-1 & 1\\
+0 & 1
+\end{array} \right], \notag\\
+R = 1, q = 1, Q = 1, t_0 = 1, t_1 = 4, \notag\\
+x_0 = \left[ \begin{array}{cc}
+0\\
+0
+\end{array} \right],
+X_0 = \left[ \begin{array}{cc}
+1 & 0\\
+0 & 1
+\end{array} \right], \notag \\
+\gamma_1(t) = 0.9 t^2, \gamma_2(t) = 1/t^2, \gamma_3(t) = 1.5/t. \notag
+\end{gather}
+
+Трубки информационного множества, соответствующий измерениям $G_1, G_2, G_3$ (соответственно зелёным, красным и синим):
+
+\includegraphics[scale=1]{pics/ex1_tube_diff.eps}
+
+Трубка информационного множества, соответствующее измерению $G_2$:
+
+\includegraphics[scale=1]{pics/ex1_tube_2.eps}
+
+Информационное множество для измерения $G_1$ в момент времени $t_1$:
+
+\includegraphics[scale=1]{pics/ex1_approx.eps}
+
+\subsection{Пример 2}
+\begin{gather}
+A = \left[ \begin{array}{cc}
+1 & 2\\
+-2 & -1
+\end{array} \right],
+C = \left[ \begin{array}{cc}
+1 \\
+-1
+\end{array} \right], \notag \\
+G_1 = \left[ \begin{array}{cc}
+1 & 1\\
+0 & -1
+\end{array} \right],
+G_2 = \left[ \begin{array}{cc}
+1 & 1\\
+-1 & 1
+\end{array} \right],
+G_3 = \left[ \begin{array}{cc}
+-1 & 1\\
+0 & 1
+\end{array} \right], \notag\\
+R = 1, q = 1, Q = 1, t_0 = 1, t_1 = 4, \notag\\
+x_0 = \left[ \begin{array}{cc}
+0\\
+0
+\end{array} \right],
+X_0 = \left[ \begin{array}{cc}
+1 & 0\\
+0 & 1
+\end{array} \right], \notag \\
+\gamma_1(t) = 0.9 t^2, \gamma_2(t) = 1/t^2, \gamma_3(t) = 1.5/t. \notag
+\end{gather}
+
+Трубки информационного множества, соответствующий измерениям $G_1, G_2, G_3$ (соответственно зелёным, красным и синим):
+
+\includegraphics[scale=1]{pics/ex2_tube_diff.eps}
+
+\subsection{Пример 3}
+\begin{gather}
+A = \left[ \begin{array}{cc}
+1 & 2\\
+-2 & -1
+\end{array} \right],
+C = \left[ \begin{array}{cc}
+1 \\
+-1
+\end{array} \right], \notag \\
+G_1 = \left[ \begin{array}{cc}
+1 & 1\\
+0 & -1
+\end{array} \right],
+G_2 = \left[ \begin{array}{cc}
+1 & 1\\
+-1 & 1
+\end{array} \right],
+G_3 = \left[ \begin{array}{cc}
+-1 & 1\\
+0 & 1
+\end{array} \right], \notag\\
+R = 1, q = 1, Q = 2, t_0 = 1, t_1 = 4, \notag\\
+x_0 = \left[ \begin{array}{cc}
+0\\
+0
+\end{array} \right],
+X_0 = \left[ \begin{array}{cc}
+1 & 2\\
+-2 & 3
+\end{array} \right], \notag \\
+\gamma_1(t) = 0.9 t^2, \gamma_2(t) = 1/t^2, \gamma_3(t) = 1.5/t. \notag
+\end{gather}
+
+Трубки информационного множества, соответствующий измерениям $G_1, G_2, G_3$ (соответственно зелёным, красным и синим):
+
+\includegraphics[scale=1]{pics/ex3_tube_diff.eps}
+
+\begin{comment}
+\subsection{Пример №1}
+Пусть $A = 
+\begin{bmatrix} 0 & 1 \\ -5 & 0 \end{bmatrix}$,
+$C =  \begin{bmatrix} 0 \\ 0 \end{bmatrix},$ $G = \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix},$
+$q = 1$, $t \in [2; 3]$, $x_0 = (0,0)'$
+~\\
+Функции $\gamma$:
+
+$\gamma_1(t) = 0.5$, $\gamma_2(t) = 1$, $\gamma_3(t) = 1.5$
+~\\
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{set1}
+\caption{Информационное множество.Красным выделено информационное множество.}
+\end{center}
+\end{figure}
+\begin{figure}
+\begin{center}
+  \includegraphics[width=0.8\textwidth]{tube11}
+  \includegraphics[width=0.8\textwidth]{tube12}
+  \caption{Трубка достижимости}
+\end{center}
+\end{figure}
+
+При $G = \begin{bmatrix} 1 & 1 \\ 0 & -1 \end{bmatrix}$
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{set2}
+\caption{Информационное множество.Красным выделено информационное множество.}
+\end{center}
+\end{figure}
+\begin{figure}
+\begin{center}
+  \includegraphics[width=0.8\textwidth]{tube21}
+  \includegraphics[width=0.8\textwidth]{tube22}
+  \caption{Трубка достижимости}
+\end{center}
+\end{figure}
+
+При $G = \begin{bmatrix} 1 & 0 \\ 0 & 1 \\ 1 & 1\end{bmatrix}$
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{set3}
+\caption{Информационное множество.Красным выделено информационное множество.}
+\end{center}
+\end{figure}
+\begin{figure}
+\begin{center}
+  \includegraphics[width=0.8\textwidth]{tube31}
+  \includegraphics[width=0.8\textwidth]{tube32}
+  \caption{Трубка достижимости}
+\end{center}
+\end{figure}
+
+\subsection{Пример №2}
+Пусть $A =
+\begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix}$,
+$C =  \begin{bmatrix} 1 \\ 0.5 \end{bmatrix},$ $G = \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix},$
+$q = 1$, $t \in [2; 3]$, $x_0 = (0,0)'$
+~\\
+Функции $\gamma$:
+
+$\gamma_1(t) = 0.9t^2$, $\gamma_2(t) = 1/t^2$, $\gamma_3(t) = 1.5/t$
+~\\
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{set4}
+\caption{Информационное множество.Красным выделено информационное множество.}
+\end{center}
+\end{figure}
+\begin{figure}
+\begin{center}
+  \includegraphics[width=0.8\textwidth]{tube41}
+  \includegraphics[width=0.8\textwidth]{tube42}
+  \caption{Трубка достижимости}
+\end{center}
+\end{figure}
+
+При $G = \begin{bmatrix} 1 & 1 \\ 0 & -1 \end{bmatrix}$
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{set5}
+\caption{Информационное множество.Красным выделено информационное множество.}
+\end{center}
+\end{figure}
+\begin{figure}
+\begin{center}
+  \includegraphics[width=0.8\textwidth]{tube51}
+  \includegraphics[width=0.8\textwidth]{tube52}
+  \caption{Трубка достижимости}
+\end{center}
+\end{figure}
+
+\subsection{Пример №3}
+Пусть $A =
+\begin{bmatrix} 0 & 0 \\ 0 & -1 \end{bmatrix}$,
+$C =  \begin{bmatrix} 1 \\ 0.5 \end{bmatrix},$ $G = \begin{bmatrix} 1 & 1 \\ 0 & -1 \end{bmatrix},$
+$q = 1$, $t \in [2; 3]$, $x_0 = (0,0)'$
+~\\
+Функции $\gamma$:
+
+$\gamma_1(t) = 0.9t^2$, $\gamma_2(t) = 1/t^2$, $\gamma_3(t) = 1.5/t$
+~\\
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{set6}
+\caption{Информационное множество.Красным выделено информационное множество.}
+\end{center}
+\end{figure}
+\begin{figure}
+ \begin{center}
+  \includegraphics[width=0.8\textwidth]{tube61}
+  \includegraphics[width=0.8\textwidth]{tube62}
+  \caption{Трубка достижимости}
+  \end{center}
+\end{figure}
+\subsection{Пример №4}
+Пусть $A =
+\begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix}$,
+$C =  \begin{bmatrix} 0 \\ 1 \end{bmatrix},$ $G = \begin{bmatrix} 1 & 0 \\ 0 & 0 \end{bmatrix},$
+$q = 1$, $t \in [2; 3]$, $x_0 = (0,0)'$
+~\\
+Функции $\gamma$:
+
+$\gamma_1(t) = 0.9t^2$, $\gamma_2(t) = 1/t^2$, $\gamma_3(t) = 1.5/t$
+$$y_1 = x + 0.5, y_2 = 0.5x^2$$
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{vs}
+\caption{Применение интегрального метода для разных измерений}
+\end{center}
+\end{figure}
+\end{comment}
+\newpage
+\begin{thebibliography}{99}
+\bibitem{newllang} \textit{A.B. Kurzhanski, Pravin Varaiya} "Dynamic and Control of Trajectory Tubes", Birkhauser.
+\end{thebibliography}
+\end{document} 
